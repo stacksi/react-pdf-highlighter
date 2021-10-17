@@ -69,8 +69,8 @@ export interface Viewport {
 }
 
 export interface T_EventBus {
-  on: (eventName: string, callback: () => void) => void;
-  off: (eventName: string, callback: () => void) => void;
+  on: (eventName: string, callback: (data: any) => void) => void;
+  off: (eventName: string, callback: (data: any) => void) => void;
 }
 
 export interface T_PDFJS_Viewer {
@@ -95,7 +95,7 @@ export interface T_PDFJS_LinkService {
   setViewer: (viewer: T_PDFJS_Viewer) => void;
 }
 
-enum FIND_STATE {
+export enum FIND_STATE {
   FOUND,
   NOT_FOUND,
   WRAPPED,
@@ -111,5 +111,4 @@ export interface T_PDFJS_FindController {
     query: string
   }) => void
   get selected(): { pageIdx: number, matchIdx: number }
-  get state(): FIND_STATE
 }

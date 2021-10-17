@@ -43,6 +43,7 @@ import type {
   T_PDFJS_Viewer,
   T_PDFJS_LinkService,
   T_PDFJS_FindController,
+  FIND_STATE
 } from "../types";
 import type { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
 
@@ -90,6 +91,10 @@ interface Props<T_HT> {
     transformSelection: () => void
   ) => JSX.Element | null;
   enableAreaSelection: (event: MouseEvent) => boolean;
+  onFind?: (data: {
+    state: FIND_STATE,
+    rawQuery: string
+  }) => void;
 }
 
 const EMPTY_ID = "empty-id";
@@ -129,7 +134,11 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
   resizeObserver: ResizeObserver | null = null;
   containerNode?: HTMLDivElement | null = null;
-  unsubscribe = () => { };
+  unsubscribe = () => {
+    if (this.props.onFind) {
+      this.eventBus.off('updatefindcontrolstate', this.props.onFind)
+    }
+  };
 
   constructor(props: Props<T_HT>) {
     super(props);
@@ -197,6 +206,10 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     this.linkService.setDocument(pdfDocument);
     this.linkService.setViewer(this.viewer);
     this.viewer.setDocument(pdfDocument);
+
+    if (this.props.onFind) {
+      this.eventBus.on('updatefindcontrolstate', this.props.onFind);
+    }
 
     // debug
     (window as any).PdfViewer = this;
