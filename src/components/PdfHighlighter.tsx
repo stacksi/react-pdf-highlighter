@@ -5,6 +5,7 @@ import debounce from "lodash.debounce";
 import {
   EventBus,
   PDFViewer,
+  PDFFindController,
   PDFLinkService,
   // @ts-ignore
 } from "pdfjs-dist/legacy/web/pdf_viewer";
@@ -41,6 +42,7 @@ import type {
   T_EventBus,
   T_PDFJS_Viewer,
   T_PDFJS_LinkService,
+  T_PDFJS_FindController,
 } from "../types";
 import type { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
 
@@ -117,12 +119,17 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     externalLinkTarget: 2,
   });
 
+  pdfFindController: T_PDFJS_FindController = new PDFFindController({
+    linkService: this.linkService,
+    eventBus: this.eventBus,
+  });
+
   // @ts-ignore
   viewer: T_PDFJS_Viewer;
 
   resizeObserver: ResizeObserver | null = null;
   containerNode?: HTMLDivElement | null = null;
-  unsubscribe = () => {};
+  unsubscribe = () => { };
 
   constructor(props: Props<T_HT>) {
     super(props);
@@ -184,6 +191,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         enhanceTextSelection: true,
         removePageBorders: true,
         linkService: this.linkService,
+        findController: this.pdfFindController
       });
 
     this.linkService.setDocument(pdfDocument);
@@ -402,7 +410,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         ...pageViewport.convertToPdfPoint(
           0,
           scaledToViewport(boundingRect, pageViewport, usePdfCoordinates).top -
-            scrollMargin
+          scrollMargin
         ),
         0,
       ],

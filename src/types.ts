@@ -94,3 +94,13 @@ export interface T_PDFJS_LinkService {
   setDocument: (document: Object) => void;
   setViewer: (viewer: T_PDFJS_Viewer) => void;
 }
+
+export interface T_PDFJS_FindController {
+  executeCommand: (cmd: 'find', options: {
+    caseSensitive?: boolean,
+    findPrevious?: undefined,
+    highlightAll?: boolean,
+    phraseSearch?: boolean,
+    query: string
+  }) => void
+}
