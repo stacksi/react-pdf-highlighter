@@ -95,6 +95,13 @@ export interface T_PDFJS_LinkService {
   setViewer: (viewer: T_PDFJS_Viewer) => void;
 }
 
+enum FIND_STATE {
+  FOUND,
+  NOT_FOUND,
+  WRAPPED,
+  PENDING
+}
+
 export interface T_PDFJS_FindController {
   executeCommand: (cmd: 'find', options: {
     caseSensitive?: boolean,
@@ -103,4 +110,6 @@ export interface T_PDFJS_FindController {
     phraseSearch?: boolean,
     query: string
   }) => void
+  get selected(): { pageIdx: number, matchIdx: number }
+  get state(): FIND_STATE
 }

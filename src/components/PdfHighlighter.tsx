@@ -119,7 +119,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     externalLinkTarget: 2,
   });
 
-  pdfFindController: T_PDFJS_FindController = new PDFFindController({
+  findController: T_PDFJS_FindController = new PDFFindController({
     linkService: this.linkService,
     eventBus: this.eventBus,
   });
@@ -191,7 +191,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         enhanceTextSelection: true,
         removePageBorders: true,
         linkService: this.linkService,
-        findController: this.pdfFindController
+        findController: this.findController
       });
 
     this.linkService.setDocument(pdfDocument);
