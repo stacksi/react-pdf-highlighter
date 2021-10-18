@@ -45,6 +45,7 @@ import type {
   T_PDFJS_Viewer,
   T_PDFJS_LinkService,
   T_PDFJS_FindController,
+  FindResult,
 } from "../types";
 
 import type { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
@@ -93,7 +94,7 @@ interface Props<T_HT> {
     transformSelection: () => void
   ) => JSX.Element | null;
   enableAreaSelection: (event: MouseEvent) => boolean;
-  onFind?: (data: { text: string, position: ScaledPosition }) => void;
+  onFind?: (data: FindResult) => void;
 }
 
 const EMPTY_ID = "empty-id";
@@ -134,11 +135,16 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   resizeObserver: ResizeObserver | null = null;
   containerNode?: HTMLDivElement | null = null;
 
-  onFind = ({ state }: { state: FIND_STATE, rawQuery: string }) => {
-    if (state === FIND_STATE.FOUND) {
-      // For running after UI updated
-      setTimeout(() => {
-        if (this.props.onFind) {
+  onFind = ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
+    // For running after UI updated
+    setTimeout(() => {
+      if (this.props.onFind) {
+        let data: { text: string, position: ScaledPosition | null } = {
+          text: rawQuery,
+          position: null,
+        };
+
+        if (state === FIND_STATE.FOUND) {
           const range = document.createRange();
           const foundEl = this.containerNode?.getElementsByClassName('highlight selected').item(0);
 
@@ -161,15 +167,16 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
           const boundingRect = getBoundingRect(rects);
           const viewportPosition = { boundingRect, rects, pageNumber: page.number };
-          const data = {
-            text: range.toString(),
+
+          data = {
+            text: rawQuery,
             position: this.viewportPositionToScaled(viewportPosition)
           };
-
-          this.props.onFind(data);
         }
-      }, 0);
-    }
+
+        this.props.onFind({ state, ...data });
+      }
+    }, 0);
   }
 
   unsubscribe = () => { };

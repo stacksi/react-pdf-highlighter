@@ -1,4 +1,5 @@
 import type { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
+import { FIND_STATE } from './constants';
 
 export interface LTWH {
   left: number;
@@ -104,4 +105,10 @@ export interface T_PDFJS_FindController {
     query: string
   }) => void
   get selected(): { pageIdx: number, matchIdx: number }
+}
+
+export interface FindResult {
+  state: FIND_STATE
+  text: string
+  position: ScaledPosition | null
 }
