@@ -14,6 +14,9 @@ interface Props {
   onError?: (error: Error) => void;
   cMapUrl?: string;
   cMapPacked?: boolean;
+  disableAutoFetch?: boolean;
+  disableStream?: boolean;
+  disableRange?: boolean;
 }
 
 interface State {
@@ -98,8 +101,8 @@ export class PdfLoader extends Component<Props, State> {
         {error
           ? this.renderError()
           : !pdfDocument || !children
-          ? beforeLoad
-          : children(pdfDocument)}
+            ? beforeLoad
+            : children(pdfDocument)}
       </>
     );
   }
