@@ -95,13 +95,6 @@ export interface T_PDFJS_LinkService {
   setViewer: (viewer: T_PDFJS_Viewer) => void;
 }
 
-export enum FIND_STATE {
-  FOUND,
-  NOT_FOUND,
-  WRAPPED,
-  PENDING
-}
-
 export interface T_PDFJS_FindController {
   executeCommand: (cmd: 'find', options: {
     caseSensitive?: boolean,

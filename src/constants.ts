@@ -1,0 +1,6 @@
+export enum FIND_STATE {
+  FOUND,
+  NOT_FOUND,
+  WRAPPED,
+  PENDING
+}

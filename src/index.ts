@@ -6,3 +6,4 @@ export { AreaHighlight } from "./components/AreaHighlight";
 export { PdfLoader } from "./components/PdfLoader";
 
 export * from "./types";
+export * from "./constants";
