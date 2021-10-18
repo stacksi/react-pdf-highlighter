@@ -144,7 +144,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
           position: null,
         };
 
-        if (state === FIND_STATE.FOUND) {
+        if (state === FIND_STATE.FOUND || state === FIND_STATE.WRAPPED) {
           const range = document.createRange();
           const foundEl = this.containerNode?.getElementsByClassName('highlight selected').item(0);
 
