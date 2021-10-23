@@ -95,6 +95,7 @@ interface Props<T_HT> {
   ) => JSX.Element | null;
   enableAreaSelection: (event: MouseEvent) => boolean;
   onFind?: (data: FindResult) => void;
+  removePageBorders?: boolean
 }
 
 const EMPTY_ID = "empty-id";
@@ -241,7 +242,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         container: this.containerNode,
         eventBus: this.eventBus,
         enhanceTextSelection: true,
-        removePageBorders: true,
+        removePageBorders: this.props.removePageBorders,
         linkService: this.linkService,
         findController: this.findController
       });
