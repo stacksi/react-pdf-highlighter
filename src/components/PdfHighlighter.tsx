@@ -4,8 +4,7 @@ import debounce from "lodash.debounce";
 
 import {
   EventBus,
-  // PDFViewer,
-  PDFSinglePageViewer,
+  PDFViewer,
   PDFFindController,
   PDFLinkService,
   // @ts-ignore
@@ -238,10 +237,11 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     this.viewer =
       this.viewer ||
-      new PDFSinglePageViewer({
+      new PDFViewer({
         container: this.containerNode,
         eventBus: this.eventBus,
         enhanceTextSelection: true,
+        removePageBorders: true,
         linkService: this.linkService,
         findController: this.findController
       });
