@@ -1,4 +1,4 @@
-import type { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
+import type { PDFDocumentProxy } from "@stacksi/pdfjs-dist/types/display/api";
 import { FIND_STATE } from './constants';
 
 export interface LTWH {
