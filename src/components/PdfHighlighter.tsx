@@ -147,13 +147,25 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
         if (state === FIND_STATE.FOUND || state === FIND_STATE.WRAPPED) {
           const range = document.createRange();
-          const foundEl = this.containerNode?.getElementsByClassName('highlight selected').item(0);
+          const elms = this.containerNode?.getElementsByClassName('highlight selected');
 
-          if (!foundEl) {
+          if (!elms?.length) {
             return;
           }
 
-          range.selectNode(foundEl);
+          if (elms.length > 1) {
+            for (let i = 0; i < elms.length; i++) {
+              const elm = elms[i];
+              if (elm.className.includes('begin')) {
+                range.setStart(elm, 0);
+              } else if (elm.className.includes('end')) {
+                range.setEnd(elm, elm.childNodes.length);
+              }
+            }
+          } else {
+            range.selectNode(elms[0]);
+          }
+
           const page = getPageFromRange(range);
 
           if (!page) {
