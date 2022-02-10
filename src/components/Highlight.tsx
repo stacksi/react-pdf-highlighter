@@ -19,6 +19,7 @@ interface Props {
     text: string;
   };
   className?: string;
+  id?: string
 }
 
 export class Highlight extends Component<Props> {
@@ -30,7 +31,8 @@ export class Highlight extends Component<Props> {
       onMouseOver,
       onMouseOut,
       comment,
-      className = ''
+      className = '',
+      id
     } = this.props;
 
     const { rects, boundingRect } = position;
@@ -50,7 +52,7 @@ export class Highlight extends Component<Props> {
             {comment.emoji}
           </div>
         ) : null}
-        <div className="Highlight__parts">
+        <div id={`highlight-${id}`} className="Highlight__parts">
           {rects.map((rect, index) => (
             <div
               onMouseOver={onMouseOver}
