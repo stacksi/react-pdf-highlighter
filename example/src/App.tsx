@@ -181,7 +181,9 @@ class App extends Component<{}, State> {
                       PdfViewer.findController.executeCommand('find', {
                         caseSensitive: false,
                         phraseSearch: true,
-                        query: 'What is the Breach Notification process back to NRG Energy? NRG requires notification  within 24 hours.'
+                        query: 'Good: "All communications between our site and NRG Energy, Inc will be protected by IPSec\
+                          ESP Tunnel mode using 256-bit AES encryption, SHA-1 authentication. We exchange\
+                          authentication material via either out-of-band shared secret, or PKI certificates."'
                       })
                       hideTipAndSelection();
                     }}

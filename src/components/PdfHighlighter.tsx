@@ -7,9 +7,10 @@ import {
   PDFViewer,
   PDFLinkService,
   PDFFindController,
-} from "pdfjs-dist/legacy/web/pdf_viewer";
+  NullL10n,
+} from "@stacksi/pdfjs-dist-latest/web/pdf_viewer";
 
-import "pdfjs-dist/web/pdf_viewer.css";
+import "@stacksi/pdfjs-dist-latest/web/pdf_viewer.css";
 import "../style/pdf_viewer.css";
 
 import "../style/PdfHighlighter.css";
@@ -42,7 +43,7 @@ import type {
   LTWHP,
   FindResult,
 } from "../types";
-import type { PDFDocumentProxy } from "pdfjs-dist";
+import type { PDFDocumentProxy } from "@stacksi/pdfjs-dist-latest";
 
 type T_ViewportHighlight<T_HT> = { position: Position } & T_HT;
 
@@ -256,7 +257,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         linkService: this.linkService,
         findController: this.findController,
         renderer: "canvas",
-        l10n: null,
+        l10n: NullL10n,
       });
 
     this.linkService.setDocument(pdfDocument);
