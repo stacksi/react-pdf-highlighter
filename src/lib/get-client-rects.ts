@@ -19,6 +19,14 @@ const isClientRectInsidePageRect = (clientRect: DOMRect, pageRect: DOMRect) => {
   return true;
 };
 
+const getPageBorders = (page: Page) => {
+  const style = getComputedStyle(page.node);
+  return {
+    borderTop: parseFloat(style.borderTopWidth.replace('px', '')),
+    borderLeft: parseFloat(style.borderLeftWidth.replace('px', '')),
+  }
+}
+
 const getClientRects = (
   range: Range,
   pages: Page[],
@@ -41,9 +49,10 @@ const getClientRects = (
         clientRect.width < pageRect.width &&
         clientRect.height < pageRect.height
       ) {
+        const { borderTop, borderLeft } = getPageBorders(page);
         const highlightedRect = {
-          top: clientRect.top + page.node.scrollTop - pageRect.top,
-          left: clientRect.left + page.node.scrollLeft - pageRect.left,
+          top: clientRect.top + page.node.scrollTop - pageRect.top - borderTop,
+          left: clientRect.left + page.node.scrollLeft - pageRect.left - borderLeft,
           width: clientRect.width,
           height: clientRect.height,
           pageNumber: page.number,
