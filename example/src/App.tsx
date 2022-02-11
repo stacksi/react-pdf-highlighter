@@ -44,7 +44,7 @@ const HighlightPopup = ({
     </div>
   ) : null;
 
-const PRIMARY_PDF_URL = "https://arxiv.org/pdf/1708.08021.pdf";
+const PRIMARY_PDF_URL = '/react-pdf-highlighter/Questionnaire.pdf';
 const SECONDARY_PDF_URL = "https://arxiv.org/pdf/1604.02480.pdf";
 
 const searchParams = new URLSearchParams(document.location.search);
@@ -75,7 +75,7 @@ class App extends Component<{}, State> {
     });
   };
 
-  scrollViewerTo = (highlight: any) => {};
+  scrollViewerTo = (highlight: any) => { };
 
   scrollToHighlightFromHash = () => {
     const highlight = this.getHighlightById(parseIdFromHash());
@@ -122,14 +122,18 @@ class App extends Component<{}, State> {
         } = h;
         return id === highlightId
           ? {
-              id,
-              position: { ...originalPosition, ...position },
-              content: { ...originalContent, ...content },
-              ...rest,
-            }
+            id,
+            position: { ...originalPosition, ...position },
+            content: { ...originalContent, ...content },
+            ...rest,
+          }
           : h;
       }),
     });
+  }
+
+  handleFind(data: any) {
+    console.log('found: ', data);
   }
 
   render() {
@@ -158,9 +162,9 @@ class App extends Component<{}, State> {
                 // pdfScaleValue="page-width"
                 scrollRef={(scrollTo) => {
                   this.scrollViewerTo = scrollTo;
-
                   this.scrollToHighlightFromHash();
                 }}
+                onFind={this.handleFind}
                 onSelectionFinished={(
                   position,
                   content,
@@ -171,7 +175,12 @@ class App extends Component<{}, State> {
                     onOpen={transformSelection}
                     onConfirm={(comment) => {
                       this.addHighlight({ content, position, comment });
-
+                      // @ts-ignore
+                      PdfViewer.findController.executeCommand('find', {
+                        caseSensitive: false,
+                        phraseSearch: true,
+                        query: 'Are you now, or have you been under investigation for any data breaches or breaches of data protection law? If so, please explain the circumstances.'
+                      })
                       hideTipAndSelection();
                     }}
                   />
