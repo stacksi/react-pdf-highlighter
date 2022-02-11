@@ -6,6 +6,7 @@ import {
   EventBus,
   PDFViewer,
   PDFLinkService,
+  PDFFindController,
 } from "pdfjs-dist/legacy/web/pdf_viewer";
 
 import "pdfjs-dist/web/pdf_viewer.css";
@@ -30,6 +31,7 @@ import TipContainer from "./TipContainer";
 import MouseSelection from "./MouseSelection";
 
 import { scaledToViewport, viewportToScaled } from "../lib/coordinates";
+import { FIND_STATE } from '../constants';
 
 import type {
   Position,
@@ -38,6 +40,7 @@ import type {
   Scaled,
   LTWH,
   LTWHP,
+  FindResult,
 } from "../types";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
@@ -85,6 +88,8 @@ interface Props<T_HT> {
     transformSelection: () => void
   ) => JSX.Element | null;
   enableAreaSelection: (event: MouseEvent) => boolean;
+  onFind?: (data: FindResult) => void;
+  removePageBorders?: boolean
 }
 
 const EMPTY_ID = "empty-id";
@@ -114,11 +119,16 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     externalLinkTarget: 2,
   });
 
+  findController = new PDFFindController({
+    linkService: this.linkService,
+    eventBus: this.eventBus,
+  });
+
   viewer!: PDFViewer;
 
   resizeObserver: ResizeObserver | null = null;
   containerNode?: HTMLDivElement | null = null;
-  unsubscribe = () => {};
+  unsubscribe = () => { };
 
   constructor(props: Props<T_HT>) {
     super(props);
@@ -131,6 +141,67 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     this.init();
   }
 
+  onFind = ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
+    // For running after UI updated
+    setTimeout(() => {
+      if (this.props.onFind) {
+        let data: { text: string, position: ScaledPosition | null } = {
+          text: rawQuery,
+          position: null,
+        };
+
+        if (state === FIND_STATE.FOUND || state === FIND_STATE.WRAPPED) {
+          const range = document.createRange();
+          const elms = this.containerNode?.getElementsByClassName('highlight selected');
+
+          if (!elms?.length) {
+            return;
+          }
+
+          if (elms.length > 1) {
+            for (let i = 0; i < elms.length; i++) {
+              const elm = elms[i];
+              if (elm.className.includes('begin')) {
+                range.setStart(elm, 0);
+              } else if (elm.className.includes('end')) {
+                range.setEnd(elm, elm.childNodes.length);
+              }
+            }
+          } else {
+            range.selectNode(elms[0]);
+          }
+
+          const pages = getPagesFromRange(range);
+
+          if (!pages || pages.length === 0) {
+            return;
+          }
+
+          const rects = getClientRects(range, pages);
+
+          if (rects.length === 0) {
+            return;
+          }
+
+          const boundingRect = getBoundingRect(rects);
+
+          const viewportPosition: Position = {
+            boundingRect,
+            rects,
+            pageNumber: pages[0].number,
+          };
+
+          data = {
+            text: rawQuery,
+            position: this.viewportPositionToScaled(viewportPosition)
+          };
+        }
+
+        this.props.onFind({ state, ...data });
+      }
+    }, 0);
+  }
+
   attachRef = (ref: HTMLDivElement | null) => {
     const { eventBus, resizeObserver: observer } = this;
     this.containerNode = ref;
@@ -140,6 +211,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       const { ownerDocument: doc } = ref;
       eventBus.on("textlayerrendered", this.onTextLayerRendered);
       eventBus.on("pagesinit", this.onDocumentReady);
+      eventBus.on("updatefindcontrolstate", this.onFind);
       doc.addEventListener("selectionchange", this.onSelectionChange);
       doc.addEventListener("keydown", this.handleKeyDown);
       doc.defaultView?.addEventListener("resize", this.debouncedScaleValue);
@@ -148,6 +220,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       this.unsubscribe = () => {
         eventBus.off("pagesinit", this.onDocumentReady);
         eventBus.off("textlayerrendered", this.onTextLayerRendered);
+        eventBus.off("updatefindcontrolstate", this.onFind)
         doc.removeEventListener("selectionchange", this.onSelectionChange);
         doc.removeEventListener("keydown", this.handleKeyDown);
         doc.defaultView?.removeEventListener(
@@ -179,8 +252,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         eventBus: this.eventBus,
         // enhanceTextSelection: true, // deprecated. https://github.com/mozilla/pdf.js/issues/9943#issuecomment-409369485
         textLayerMode: 2,
-        removePageBorders: true,
+        removePageBorders: this.props.removePageBorders,
         linkService: this.linkService,
+        findController: this.findController,
         renderer: "canvas",
         l10n: null,
       });
@@ -448,8 +522,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         { name: "XYZ" },
         ...pageViewport.convertToPdfPoint(
           0,
-          scaledToViewport(boundingRect, pageViewport, usePdfCoordinates).top -
-            scrollMargin
+          scaledToViewport(boundingRect, pageViewport, usePdfCoordinates).top - scrollMargin
         ),
         0,
       ],
