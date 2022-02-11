@@ -7,6 +7,7 @@ import {
   Highlight,
   Popup,
   AreaHighlight,
+  FindResult,
 } from "./react-pdf-highlighter";
 
 import type { IHighlight, NewHighlight } from "./react-pdf-highlighter";
@@ -44,7 +45,7 @@ const HighlightPopup = ({
     </div>
   ) : null;
 
-const PRIMARY_PDF_URL = "https://arxiv.org/pdf/1708.08021.pdf";
+const PRIMARY_PDF_URL = "/react-pdf-highlighter/Questionnaire.pdf";
 const SECONDARY_PDF_URL = "https://arxiv.org/pdf/1604.02480.pdf";
 
 const searchParams = new URLSearchParams(document.location.search);
@@ -75,7 +76,7 @@ class App extends Component<{}, State> {
     });
   };
 
-  scrollViewerTo = (highlight: any) => {};
+  scrollViewerTo = (highlight: any) => { };
 
   scrollToHighlightFromHash = () => {
     const highlight = this.getHighlightById(parseIdFromHash());
@@ -122,14 +123,18 @@ class App extends Component<{}, State> {
         } = h;
         return id === highlightId
           ? {
-              id,
-              position: { ...originalPosition, ...position },
-              content: { ...originalContent, ...content },
-              ...rest,
-            }
+            id,
+            position: { ...originalPosition, ...position },
+            content: { ...originalContent, ...content },
+            ...rest,
+          }
           : h;
       }),
     });
+  }
+
+  handleFind(data: FindResult) {
+    console.log('found: ', data);
   }
 
   render() {
@@ -161,6 +166,7 @@ class App extends Component<{}, State> {
 
                   this.scrollToHighlightFromHash();
                 }}
+                onFind={this.handleFind}
                 onSelectionFinished={(
                   position,
                   content,
@@ -171,7 +177,12 @@ class App extends Component<{}, State> {
                     onOpen={transformSelection}
                     onConfirm={(comment) => {
                       this.addHighlight({ content, position, comment });
-
+                      // @ts-ignore
+                      PdfViewer.findController.executeCommand('find', {
+                        caseSensitive: false,
+                        phraseSearch: true,
+                        query: 'What is the Breach Notification process back to NRG Energy? NRG requires notification  within 24 hours.'
+                      })
                       hideTipAndSelection();
                     }}
                   />
