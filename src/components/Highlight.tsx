@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import clsx from 'clsx';
 
 import "../style/Highlight.css";
 
@@ -9,25 +10,27 @@ interface Props {
     boundingRect: LTWHP;
     rects: Array<LTWHP>;
   };
+  isScrolledTo: boolean;
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
-  comment: {
+  comment?: {
     emoji: string;
     text: string;
   };
-  isScrolledTo: boolean;
+  className?: string;
 }
 
 export class Highlight extends Component<Props> {
   render() {
     const {
       position,
+      isScrolledTo,
       onClick,
       onMouseOver,
       onMouseOut,
       comment,
-      isScrolledTo,
+      className
     } = this.props;
 
     const { rects, boundingRect } = position;
@@ -55,7 +58,7 @@ export class Highlight extends Component<Props> {
               onClick={onClick}
               key={index}
               style={rect}
-              className={`Highlight__part`}
+              className={clsx('Highlight__part', className)}
             />
           ))}
         </div>
