@@ -8,9 +8,9 @@ import {
   PDFLinkService,
   PDFFindController,
   NullL10n,
-} from "@stacksi/pdfjs-dist-latest/web/pdf_viewer";
+} from "@stacksi/pdfjs-dist/web/pdf_viewer";
 
-import "@stacksi/pdfjs-dist-latest/web/pdf_viewer.css";
+import "@stacksi/pdfjs-dist/web/pdf_viewer.css";
 import "../style/pdf_viewer.css";
 
 import "../style/PdfHighlighter.css";
@@ -43,7 +43,7 @@ import type {
   LTWHP,
   FindResult,
 } from "../types";
-import type { PDFDocumentProxy } from "@stacksi/pdfjs-dist-latest";
+import type { PDFDocumentProxy } from "@stacksi/pdfjs-dist";
 
 type T_ViewportHighlight<T_HT> = { position: Position } & T_HT;
 
