@@ -53,6 +53,7 @@ interface State<T_HT> {
     content?: { text?: string; image?: string };
   } | null;
   isCollapsed: boolean;
+  selection: Selection | null;
   range: Range | null;
   tip: {
     highlight: T_ViewportHighlight<T_HT>;
@@ -106,6 +107,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   state: State<T_HT> = {
     ghostHighlight: null,
     isCollapsed: true,
+    selection: null,
     range: null,
     scrolledToHighlightId: EMPTY_ID,
     isAreaSelectionInProgress: false,
@@ -575,7 +577,8 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     this.setState({
       isCollapsed: false,
-      range,
+      selection,
+      range
     });
 
     this.debouncedAfterSelection();
@@ -616,10 +619,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
   afterSelection = () => {
     const { onSelectionFinished } = this.props;
+    const { isCollapsed, selection, range } = this.state;
 
-    const { isCollapsed, range } = this.state;
-
-    if (!range || isCollapsed) {
+    if (!selection || !range || isCollapsed) {
       return;
     }
 
@@ -644,7 +646,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     };
 
     const content = {
-      text: range.toString(),
+      text: selection.toString(),
     };
     const scaledPosition = this.viewportPositionToScaled(viewportPosition);
 
