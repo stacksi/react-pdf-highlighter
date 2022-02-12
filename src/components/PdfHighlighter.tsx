@@ -7,9 +7,10 @@ import {
   PDFViewer,
   PDFLinkService,
   PDFFindController,
-} from "pdfjs-dist/legacy/web/pdf_viewer";
+  NullL10n,
+} from "@stacksi/pdfjs-dist-latest/web/pdf_viewer";
 
-import "pdfjs-dist/web/pdf_viewer.css";
+import "@stacksi/pdfjs-dist-latest/web/pdf_viewer.css";
 import "../style/pdf_viewer.css";
 
 import "../style/PdfHighlighter.css";
@@ -42,7 +43,7 @@ import type {
   LTWHP,
   FindResult,
 } from "../types";
-import type { PDFDocumentProxy } from "pdfjs-dist";
+import type { PDFDocumentProxy } from "@stacksi/pdfjs-dist-latest";
 
 type T_ViewportHighlight<T_HT> = { position: Position } & T_HT;
 
@@ -52,6 +53,7 @@ interface State<T_HT> {
     content?: { text?: string; image?: string };
   } | null;
   isCollapsed: boolean;
+  selection: Selection | null;
   range: Range | null;
   tip: {
     highlight: T_ViewportHighlight<T_HT>;
@@ -105,6 +107,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   state: State<T_HT> = {
     ghostHighlight: null,
     isCollapsed: true,
+    selection: null,
     range: null,
     scrolledToHighlightId: EMPTY_ID,
     isAreaSelectionInProgress: false,
@@ -256,7 +259,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         linkService: this.linkService,
         findController: this.findController,
         renderer: "canvas",
-        l10n: null,
+        l10n: NullL10n,
       });
 
     this.linkService.setDocument(pdfDocument);
@@ -574,7 +577,8 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     this.setState({
       isCollapsed: false,
-      range,
+      selection,
+      range
     });
 
     this.debouncedAfterSelection();
@@ -615,10 +619,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
   afterSelection = () => {
     const { onSelectionFinished } = this.props;
+    const { isCollapsed, selection, range } = this.state;
 
-    const { isCollapsed, range } = this.state;
-
-    if (!range || isCollapsed) {
+    if (!selection || !range || isCollapsed) {
       return;
     }
 
@@ -643,7 +646,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     };
 
     const content = {
-      text: range.toString(),
+      text: selection.toString(),
     };
     const scaledPosition = this.viewportPositionToScaled(viewportPosition);
 

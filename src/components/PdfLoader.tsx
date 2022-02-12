@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf";
-import type { PDFDocumentProxy } from "pdfjs-dist";
+import { getDocument, GlobalWorkerOptions, PDFDocumentProxy } from "@stacksi/pdfjs-dist-latest";
 
 interface Props {
   /** See `GlobalWorkerOptionsType`. */
@@ -28,7 +26,7 @@ export class PdfLoader extends Component<Props, State> {
   };
 
   static defaultProps = {
-    workerSrc: "https://unpkg.com/pdfjs-dist@2.11.338/build/pdf.worker.min.js",
+    workerSrc: "https://unpkg.com/@stacksi/pdfjs-dist-latest@2.13.133/build/pdf.worker.min.js",
   };
 
   documentRef = React.createRef<HTMLElement>();
@@ -98,8 +96,8 @@ export class PdfLoader extends Component<Props, State> {
         {error
           ? this.renderError()
           : !pdfDocument || !children
-          ? beforeLoad
-          : children(pdfDocument)}
+            ? beforeLoad
+            : children(pdfDocument)}
       </>
     );
   }
