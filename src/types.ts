@@ -1,6 +1,15 @@
 import { FIND_STATE } from './constants';
+import type {
+  EventBus,
+  PDFFindController,
+  PDFViewer
+} from '@stacksi/pdfjs-dist/web/pdf_viewer';
 
-export type { PDFViewer } from '@stacksi/pdfjs-dist/web/pdf_viewer';
+export interface PdfViewer {
+  viewer: PDFViewer;
+  eventBus: EventBus;
+  findController: PDFFindController;
+}
 
 export interface LTWH {
   left: number;
