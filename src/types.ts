@@ -1,5 +1,7 @@
 import { FIND_STATE } from './constants';
 
+export type { PDFViewer } from '@stacksi/pdfjs-dist/web/pdf_viewer';
+
 export interface LTWH {
   left: number;
   top: number;
@@ -77,17 +79,6 @@ export interface Viewport {
 export interface Page {
   node: HTMLElement;
   number: number;
-}
-
-export interface FindController {
-  executeCommand: (cmd: 'find', options: {
-    caseSensitive?: boolean,
-    findPrevious?: undefined,
-    highlightAll?: boolean,
-    phraseSearch?: boolean,
-    query: string
-  }) => void
-  get selected(): { pageIdx: number, matchIdx: number } | undefined
 }
 
 export interface FindResult {
