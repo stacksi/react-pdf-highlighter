@@ -31,7 +31,7 @@ import {
 import TipContainer from "./TipContainer";
 import MouseSelection from "./MouseSelection";
 
-import { scaledToViewport, viewportToScaled } from "../lib/coordinates";
+import { scaledPositionToViewport, scaledToViewport, viewportToScaled } from "../lib/coordinates";
 import { FIND_STATE } from '../constants';
 
 import type {
@@ -349,21 +349,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     this.setTip(highlight.position, content);
   }
 
-  scaledPositionToViewport({
-    pageNumber,
-    boundingRect,
-    rects,
-    usePdfCoordinates,
-  }: ScaledPosition): Position {
-    const viewport = this.viewer.getPageView(pageNumber - 1).viewport;
-
-    return {
-      boundingRect: scaledToViewport(boundingRect, viewport, usePdfCoordinates),
-      rects: (rects || []).map((rect) =>
-        scaledToViewport(rect, viewport, usePdfCoordinates)
-      ),
-      pageNumber,
-    };
+  scaledPositionToViewport(position: ScaledPosition): Position {
+    const viewport = this.viewer.getPageView(position.pageNumber - 1).viewport;
+    return scaledPositionToViewport(position, viewport);
   }
 
   viewportPositionToScaled({

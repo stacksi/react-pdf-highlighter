@@ -4,7 +4,7 @@
 // for clarity reasons I decided not to store actual (0, 1) coordinates, but
 // provide width and height, so user can compute ratio himself if needed
 
-import type { LTWHP, Scaled, Viewport } from "../types";
+import type { LTWHP, Position, Scaled, ScaledPosition, Viewport } from "../types";
 
 interface WIDTH_HEIGHT {
   width: number;
@@ -75,5 +75,19 @@ export const scaledToViewport = (
     width: x2 - x1,
     height: y2 - y1,
     pageNumber: scaled.pageNumber,
+  };
+};
+
+export const scaledPositionToViewport = ({
+  pageNumber,
+  boundingRect,
+  rects,
+usePdfCoordinates }: ScaledPosition, viewport: Viewport): Position => {
+  return {
+    boundingRect: scaledToViewport(boundingRect, viewport, usePdfCoordinates),
+    rects: (rects || []).map((rect) =>
+      scaledToViewport(rect, viewport, usePdfCoordinates)
+    ),
+    pageNumber,
   };
 };
