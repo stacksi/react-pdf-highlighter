@@ -82,7 +82,10 @@ export const scaledPositionToViewport = ({
   pageNumber,
   boundingRect,
   rects,
-usePdfCoordinates }: ScaledPosition, viewport: Viewport): Position => {
+  usePdfCoordinates
+}: ScaledPosition,
+viewport: Viewport
+): Position => {
   return {
     boundingRect: scaledToViewport(boundingRect, viewport, usePdfCoordinates),
     rects: (rects || []).map((rect) =>
@@ -91,3 +94,17 @@ usePdfCoordinates }: ScaledPosition, viewport: Viewport): Position => {
     pageNumber,
   };
 };
+
+export const viewportPositionToScaled = ({
+  pageNumber,
+  boundingRect,
+  rects,
+}: Position,
+viewport: Viewport
+): ScaledPosition => {
+  return {
+    boundingRect: viewportToScaled(boundingRect, viewport),
+    rects: (rects || []).map((rect) => viewportToScaled(rect, viewport)),
+    pageNumber,
+  };
+}

@@ -28,10 +28,15 @@ import {
   isHTMLElement,
 } from "../lib/pdfjs-dom";
 
+import {
+  scaledPositionToViewport,
+  scaledToViewport,
+  viewportPositionToScaled,
+  viewportToScaled
+} from "../lib/coordinates";
+
 import TipContainer from "./TipContainer";
 import MouseSelection from "./MouseSelection";
-
-import { scaledPositionToViewport, scaledToViewport, viewportToScaled } from "../lib/coordinates";
 import { FIND_STATE } from '../constants';
 
 import type {
@@ -354,18 +359,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     return scaledPositionToViewport(position, viewport);
   }
 
-  viewportPositionToScaled({
-    pageNumber,
-    boundingRect,
-    rects,
-  }: Position): ScaledPosition {
-    const viewport = this.viewer.getPageView(pageNumber - 1).viewport;
-
-    return {
-      boundingRect: viewportToScaled(boundingRect, viewport),
-      rects: (rects || []).map((rect) => viewportToScaled(rect, viewport)),
-      pageNumber,
-    };
+  viewportPositionToScaled(position: Position): ScaledPosition {
+    const viewport = this.viewer.getPageView(position.pageNumber - 1).viewport;
+    return viewportPositionToScaled(position, viewport);
   }
 
   screenshot(position: LTWH, pageNumber: number) {
