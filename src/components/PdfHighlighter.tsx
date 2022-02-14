@@ -468,37 +468,10 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     const { tipPosition, tipChildren } = this.state;
     if (!tipPosition) return null;
 
-    const { boundingRect, pageNumber } = tipPosition;
-    const page = {
-      node: this.viewer.getPageView((boundingRect.pageNumber || pageNumber) - 1)
-        .div,
-      pageNumber: boundingRect.pageNumber || pageNumber,
-    };
-
-    const pageBoundingClientRect = page.node.getBoundingClientRect();
-
-    const pageBoundingRect = {
-      bottom: pageBoundingClientRect.bottom,
-      height: pageBoundingClientRect.height,
-      left: pageBoundingClientRect.left,
-      right: pageBoundingClientRect.right,
-      top: pageBoundingClientRect.top,
-      width: pageBoundingClientRect.width,
-      x: pageBoundingClientRect.x,
-      y: pageBoundingClientRect.y,
-      pageNumber: page.pageNumber,
-    };
-
     return (
       <TipContainer
-        scrollTop={this.viewer.container.scrollTop}
-        pageBoundingRect={pageBoundingRect}
-        style={{
-          left:
-            page.node.offsetLeft + boundingRect.left + boundingRect.width / 2,
-          top: boundingRect.top + page.node.offsetTop,
-          bottom: boundingRect.top + page.node.offsetTop + boundingRect.height,
-        }}
+        viewer={this.viewer}
+        position={tipPosition}
       >
         {tipChildren}
       </TipContainer>

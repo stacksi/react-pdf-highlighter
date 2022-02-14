@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-
-import type { LTWHP } from "../types";
+import { PDFViewer } from "@stacksi/pdfjs-dist/web/pdf_viewer";
+import type { Position } from "../types";
 
 interface State {
   height: number;
@@ -9,15 +9,14 @@ interface State {
 
 interface Props {
   children: JSX.Element | null;
-  style: { top: number; left: number; bottom: number };
-  scrollTop: number;
-  pageBoundingRect: LTWHP;
+  position: Position;
+  viewer: PDFViewer;
 }
 
 const clamp = (value: number, left: number, right: number) =>
   Math.min(Math.max(value, left), right);
 
-class TipContainer extends Component<Props, State> {
+export class TipContainer extends Component<Props, State> {
   state: State = {
     height: 0,
     width: 0,
@@ -49,13 +48,39 @@ class TipContainer extends Component<Props, State> {
   };
 
   render() {
-    const { children, style, scrollTop, pageBoundingRect } = this.props;
-
+    const { children, viewer, position } = this.props;
     const { height, width } = this.state;
 
     const isStyleCalculationInProgress = width === 0 && height === 0;
 
-    const shouldMove = style.top - height - 5 < scrollTop;
+    const { boundingRect, pageNumber } = position;
+    const page = {
+      node: viewer.getPageView((boundingRect.pageNumber || pageNumber) - 1).div,
+      pageNumber: boundingRect.pageNumber || pageNumber,
+    };
+
+    const pageBoundingClientRect = page.node.getBoundingClientRect();
+
+    const pageBoundingRect = {
+      bottom: pageBoundingClientRect.bottom,
+      height: pageBoundingClientRect.height,
+      left: pageBoundingClientRect.left,
+      right: pageBoundingClientRect.right,
+      top: pageBoundingClientRect.top,
+      width: pageBoundingClientRect.width,
+      x: pageBoundingClientRect.x,
+      y: pageBoundingClientRect.y,
+      pageNumber: page.pageNumber,
+    };
+
+    const style = {
+      left:
+        page.node.offsetLeft + boundingRect.left + boundingRect.width / 2,
+      top: boundingRect.top + page.node.offsetTop,
+      bottom: boundingRect.top + page.node.offsetTop + boundingRect.height,
+    }
+
+    const shouldMove = style.top - height - 5 < viewer.container.scrollTop;
 
     const top = shouldMove ? style.bottom + 5 : style.top - height - 5;
 
