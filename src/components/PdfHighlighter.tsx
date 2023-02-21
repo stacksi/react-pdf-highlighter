@@ -49,6 +49,7 @@ import type {
   FindResult,
 } from "../types";
 import type { PDFDocumentProxy } from "@stacksi/pdfjs-dist";
+import waitFor from '../lib/waitFor';
 
 type T_ViewportHighlight<T_HT> = { position: Position } & T_HT;
 
@@ -149,65 +150,75 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     this.init();
   }
 
-  onFind = ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
+  getHighlights() {
+    return this.containerNode?.getElementsByClassName('highlight selected');
+  }
+
+  onFind = async ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
     // For running after UI updated
-    setTimeout(() => {
-      if (this.props.onFind) {
-        let data: { text: string, position: ScaledPosition | null } = {
-          text: rawQuery,
-          position: null,
-        };
+    if (this.props.onFind) {
+      let data: { text: string, position: ScaledPosition | null } = {
+        text: rawQuery,
+        position: null,
+      };
 
-        if (state === FIND_STATE.FOUND || state === FIND_STATE.WRAPPED) {
-          const range = document.createRange();
-          const elms = this.containerNode?.getElementsByClassName('highlight selected');
+      if (state === FIND_STATE.FOUND || state === FIND_STATE.WRAPPED) {
+        const range = document.createRange();
+        let elms = this.getHighlights();
 
-          if (!elms?.length) {
+        if (!elms?.length) {
+          try {
+            await waitFor(() => !!this.getHighlights()?.length)
+            elms = this.getHighlights()!;
+          } catch {
+            this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
             return;
           }
-
-          if (elms.length > 1) {
-            for (let i = 0; i < elms.length; i++) {
-              const elm = elms[i];
-              if (elm.className.includes('begin')) {
-                range.setStart(elm, 0);
-              } else if (elm.className.includes('end')) {
-                range.setEnd(elm, elm.childNodes.length);
-              }
-            }
-          } else {
-            range.selectNode(elms[0]);
-          }
-
-          const pages = getPagesFromRange(range);
-
-          if (!pages || pages.length === 0) {
-            return;
-          }
-
-          const rects = getClientRects(range, pages);
-
-          if (rects.length === 0) {
-            return;
-          }
-
-          const boundingRect = getBoundingRect(rects);
-
-          const viewportPosition: Position = {
-            boundingRect,
-            rects,
-            pageNumber: pages[0].number,
-          };
-
-          data = {
-            text: rawQuery,
-            position: this.viewportPositionToScaled(viewportPosition)
-          };
         }
 
-        this.props.onFind({ state, ...data });
+        if (elms.length > 1) {
+          for (let i = 0; i < elms.length; i++) {
+            const elm = elms[i];
+            if (elm.className.includes('begin')) {
+              range.setStart(elm, 0);
+            } else if (elm.className.includes('end')) {
+              range.setEnd(elm, elm.childNodes.length);
+            }
+          }
+        } else {
+          range.selectNode(elms[0]);
+        }
+
+        const pages = getPagesFromRange(range);
+
+        if (!pages.length) {
+          this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
+          return;
+        }
+
+        const rects = getClientRects(range, pages);
+
+        if (!rects.length) {
+          this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
+          return;
+        }
+
+        const boundingRect = getBoundingRect(rects);
+
+        const viewportPosition: Position = {
+          boundingRect,
+          rects,
+          pageNumber: pages[0].number,
+        };
+
+        data = {
+          text: rawQuery,
+          position: this.viewportPositionToScaled(viewportPosition)
+        };
       }
-    }, 0);
+
+      this.props.onFind({ state, ...data });
+    }
   }
 
   attachRef = (ref: HTMLDivElement | null) => {
