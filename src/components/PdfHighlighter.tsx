@@ -98,6 +98,7 @@ interface Props<T_HT> {
   enableAreaSelection: (event: MouseEvent) => boolean;
   onFind?: (data: FindResult) => void;
   removePageBorders?: boolean
+  findWaitTimeout?: number
 }
 
 const EMPTY_ID = "empty-id";
@@ -155,7 +156,6 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   }
 
   onFind = async ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
-    // For running after UI updated
     if (this.props.onFind) {
       let data: { text: string, position: ScaledPosition | null } = {
         text: rawQuery,
@@ -168,7 +168,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
         if (!elms?.length) {
           try {
-            await waitFor(() => !!this.getHighlights()?.length)
+            await waitFor(() => !!this.getHighlights()?.length, this.props.findWaitTimeout)
             elms = this.getHighlights()!;
           } catch {
             this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });

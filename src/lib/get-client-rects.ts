@@ -30,14 +30,26 @@ const getPageBorders = (page: Page) => {
   }
 }
 
+const isMarkedContentEl = (el: HTMLElement | null) => {
+  return !!el?.className.includes('markedContent')
+}
+
 const getLimitsY = (range: Range) => {
   const limits = {
     start: { y: 0, page: -1 },
     end: { y: 99999, page: -1 }
   }
 
-  const startEl = range.startContainer.parentElement
-  const endEl = range.endContainer.parentElement
+  const startParentEl = range.startContainer.parentElement
+  const endParentEl = range.endContainer.parentElement
+
+  const startEl = !isMarkedContentEl(startParentEl)
+    ? startParentEl
+    : range.startContainer as HTMLElement
+
+  const endEl = !isMarkedContentEl(endParentEl)
+    ? endParentEl
+    : range.startContainer as HTMLElement
 
   if (isHTMLElement(startEl)) {
     limits.start = {
