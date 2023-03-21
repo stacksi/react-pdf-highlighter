@@ -155,70 +155,77 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     return this.containerNode?.getElementsByClassName('highlight selected');
   }
 
-  onFind = async ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
-    if (this.props.onFind) {
-      let data: { text: string, position: ScaledPosition | null } = {
-        text: rawQuery,
-        position: null,
-      };
+  onFind = ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
+    // Run after highlight elements rendered
+    setTimeout(async () => {
+      // If setTimeout is unreliable try this:
+      //
+      // Array.from(this.getHighlights() || []).forEach(el => {
+      //   el.parentNode?.removeChild(el)
+      // })
+      if (this.props.onFind) {
+        let data: { text: string, position: ScaledPosition | null } = {
+          text: rawQuery,
+          position: null,
+        };
 
-      if (state === FIND_STATE.FOUND || state === FIND_STATE.WRAPPED) {
-        const range = document.createRange();
-        let elms = this.getHighlights();
+        if (state === FIND_STATE.FOUND || state === FIND_STATE.WRAPPED) {
+          const range = document.createRange();
+          let elms = this.getHighlights();
+          if (!elms?.length) {
+            try {
+              await waitFor(() => !!this.getHighlights()?.length, this.props.findWaitTimeout)
+              elms = this.getHighlights()!;
+            } catch {
+              this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
+              return;
+            }
+          }
 
-        if (!elms?.length) {
-          try {
-            await waitFor(() => !!this.getHighlights()?.length, this.props.findWaitTimeout)
-            elms = this.getHighlights()!;
-          } catch {
+          if (elms.length > 1) {
+            for (let i = 0; i < elms.length; i++) {
+              const elm = elms[i];
+              if (elm.className.includes('begin')) {
+                range.setStart(elm, 0);
+              } else if (elm.className.includes('end')) {
+                range.setEnd(elm, elm.childNodes.length);
+              }
+            }
+          } else {
+            range.selectNode(elms[0]);
+          }
+
+          const pages = getPagesFromRange(range);
+
+          if (!pages.length) {
             this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
             return;
           }
-        }
 
-        if (elms.length > 1) {
-          for (let i = 0; i < elms.length; i++) {
-            const elm = elms[i];
-            if (elm.className.includes('begin')) {
-              range.setStart(elm, 0);
-            } else if (elm.className.includes('end')) {
-              range.setEnd(elm, elm.childNodes.length);
-            }
+          const rects = getClientRects(range, pages);
+
+          if (!rects.length) {
+            this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
+            return;
           }
-        } else {
-          range.selectNode(elms[0]);
+
+          const boundingRect = getBoundingRect(rects);
+
+          const viewportPosition: Position = {
+            boundingRect,
+            rects,
+            pageNumber: pages[0].number,
+          };
+
+          data = {
+            text: rawQuery,
+            position: this.viewportPositionToScaled(viewportPosition)
+          };
         }
 
-        const pages = getPagesFromRange(range);
-
-        if (!pages.length) {
-          this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
-          return;
-        }
-
-        const rects = getClientRects(range, pages);
-
-        if (!rects.length) {
-          this.props.onFind({ state: FIND_STATE.NOT_FOUND, ...data });
-          return;
-        }
-
-        const boundingRect = getBoundingRect(rects);
-
-        const viewportPosition: Position = {
-          boundingRect,
-          rects,
-          pageNumber: pages[0].number,
-        };
-
-        data = {
-          text: rawQuery,
-          position: this.viewportPositionToScaled(viewportPosition)
-        };
+        this.props.onFind({ state, ...data });
       }
-
-      this.props.onFind({ state, ...data });
-    }
+    }, 0)
   }
 
   attachRef = (ref: HTMLDivElement | null) => {
