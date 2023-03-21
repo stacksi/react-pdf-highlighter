@@ -179,11 +179,10 @@ class App extends Component<{}, State> {
                       this.addHighlight({ content, position, comment });
                       // @ts-ignore
                       PdfViewer.findController.executeCommand('find', {
-                        caseSensitive: false,
+                        caseSensitive: true,
+                        entireWord: false,
                         phraseSearch: true,
-                        query: 'Good: "All communications between our site and NRG Energy, Inc will be protected by IPSec\
-                          ESP Tunnel mode using 256-bit AES encryption, SHA-1 authentication. We exchange\
-                          authentication material via either out-of-band shared secret, or PKI certificates."'
+                        query: 'Yes'
                       })
                       hideTipAndSelection();
                     }}

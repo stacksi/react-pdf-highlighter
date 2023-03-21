@@ -156,7 +156,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   }
 
   onFind = ({ state, rawQuery }: { state: FIND_STATE, rawQuery: string }) => {
-    // Run after highlight elements rendered
+    // Run after new highlights rendered
     setTimeout(async () => {
       // If setTimeout is unreliable try this:
       //

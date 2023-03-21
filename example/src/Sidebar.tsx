@@ -74,6 +74,12 @@ export function Sidebar({
           <button onClick={resetHighlights}>Reset highlights</button>
         </div>
       ) : null}
+      <div style={{ padding: "1rem" }}>
+        <button onClick={() => {
+          // @ts-ignore
+          PdfViewer.findController._nextMatch()
+        }}>Find Next</button>
+      </div>
     </div>
   );
 }
